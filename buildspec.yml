@@ -19,7 +19,7 @@ phases:
     commands:
 
       # Build our application
-      # - go build -o app
+      - go build -o app
 
 artifacts:
   files:
