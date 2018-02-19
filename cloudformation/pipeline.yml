@@ -95,3 +95,79 @@ Resources:
                                 Repo: !Ref GitHubRepository
                                 Branch: !Ref GitHubBranch
                                 OAuthToken: !Ref GitHubOAuthToken
+    CodePipelineRole:
+        Type: AWS::IAM::Role
+        Properties: 
+            Path: /
+            RoleName: !Sub ${ApplicationName}-CodePipeline-${AWS::Region}
+            AssumeRolePolicyDocument: |
+                {
+                    "Statement": [{
+                        "Action": "sts:AssumeRole",
+                        "Effect": "Allow",
+                        "Principal": { 
+                            "Service": "codepipeline.amazonaws.com" 
+                        }
+                    }]
+                }
+            Policies: 
+                - 
+                    PolicyName: !Sub ${ApplicationName}-CodePipeline-${AWS::Region}
+                    PolicyDocument: !Sub |                    
+                        {
+                            "Statement": [
+                                {
+                                    "Action": [ "s3:GetBucketVersioning" ],
+                                    "Resource": [ "arn:aws:s3:::${ArtifactS3Bucket}" ],
+                                    "Effect": "Allow"
+                                },
+                                {
+                                    "Action": [
+                                        "s3:PutObject",
+                                        "s3:GetObject",
+                                        "S3:GetObjectVersion"
+                                    ],
+                                    "Resource": [
+                                        "arn:aws:s3:::${ArtifactS3Bucket}/${ApplicationName}/*"
+                                    ],
+                                    "Effect": "Allow"
+                                },
+                                {
+                                    "Action": [
+                                        "codedeploy:CreateDeployment",
+                                        "codedeploy:GetApplicationRevision",
+                                        "codedeploy:GetDeployment",
+                                        "codedeploy:GetDeploymentConfig",
+                                        "codedeploy:RegisterApplicationRevision"
+                                    ],
+                                    "Resource": "*",
+                                    "Effect": "Allow"
+                                },
+                                {
+                                    "Action": [
+                                        "cloudformation:CreateStack",
+                                        "cloudformation:DeleteStack",
+                                        "cloudformation:DescribeStacks",
+                                        "cloudformation:UpdateStack",
+                                        "cloudformation:CreateChangeSet",
+                                        "cloudformation:DeleteChangeSet",
+                                        "cloudformation:DescribeChangeSet",
+                                        "cloudformation:ExecuteChangeSet",
+                                        "cloudformation:SetStackPolicy",
+                                        "cloudformation:ValidateTemplate",
+                                        "iam:PassRole"
+                                    ],
+                                    "Resource": "*",
+                                    "Effect": "Allow"
+                                },
+                                {
+                                    "Action": [
+                                        "codebuild:BatchGetBuilds",
+                                        "codebuild:StartBuild"
+                                    ],
+                                    "Resource": "*",
+                                    "Effect": "Allow"
+                                }
+                            ]
+                        }
+
