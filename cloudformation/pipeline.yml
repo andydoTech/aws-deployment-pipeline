@@ -95,6 +95,65 @@ Resources:
                                 Repo: !Ref GitHubRepository
                                 Branch: !Ref GitHubBranch
                                 OAuthToken: !Ref GitHubOAuthToken
+                -
+                    Name: Build
+                    Actions:
+                        -
+                            Name: CodeBuild
+                            InputArtifacts:
+                                - Name: Source
+                            ActionTypeId: 
+                                Category: Build
+                                Owner: AWS
+                                Version: 1
+                                Provider: CodeBuild
+                            OutputArtifacts:
+                                - Name: Built
+                            Configuration: 
+                                ProjectName: !Ref CodeBuild
+    CodeBuildRole:
+        Type: AWS::IAM::Role
+        Properties: 
+            Path: /
+            RoleName: !Sub ${ApplicationName}-CodeBuild-${AWS::Region}
+            AssumeRolePolicyDocument: |
+                    {
+                        "Statement": [{
+                            "Action": "sts:AssumeRole",
+                            "Effect": "Allow",
+                            "Principal": { 
+                                "Service": "codebuild.amazonaws.com" 
+                            }
+                        }]
+                    }
+            Policies: 
+                - 
+                    PolicyName: !Sub ${ApplicationName}-CodeBuild-${AWS::Region}
+                    PolicyDocument: !Sub |      
+                        {
+                            "Statement": [              
+                                {
+                                    "Effect": "Allow",
+                                    "Resource": [ "*" ],
+                                    "Action": [
+                                        "logs:CreateLogGroup",
+                                        "logs:CreateLogStream",
+                                        "logs:PutLogEvents"
+                                    ]
+                                },
+                                {
+                                    "Effect": "Allow",
+                                    "Resource": [
+                                        "arn:aws:s3:::${ArtifactS3Bucket}/${ApplicationName}/*"
+                                    ],
+                                    "Action": [
+                                        "s3:GetObject",
+                                        "s3:GetObjectVersion",
+                                        "s3:PutObject"
+                                    ]
+                                }
+                            ]
+                        }
     CodePipelineRole:
         Type: AWS::IAM::Role
         Properties: 
