@@ -1,49 +1,17 @@
-version: 0.1
-            
+version: 0.2
 phases:
-
-  install: 
+  pre_build:
     commands:
-      - go get -u github.com/golang/lint/golint
-
-  pre_build: 
-    commands:
-
-      # Ensure code passes all lint tests
-      - golint -set_exit_status
-
-      # Run all tests included with our application
-      - go test
-
+      - echo Logging in to Amazon ECR...
+      - $(aws ecr get-login --no-include-email --region $AWS_DEFAULT_REGION)
   build:
     commands:
-
-      # Build our application
-      - go build -o app
-
-artifacts:
-  files:
-    - app
-    - appspec.yml
-    - buildspec.yml
-    - config/*
-    - codedeploy/*
-    - cloudformation/*
-
-#version: 0.2
-#phases:
-#  pre_build:
-#    commands:
-#      - echo Logging in to Amazon ECR...
-#      - $(aws ecr get-login --no-include-email --region $AWS_DEFAULT_REGION)
-#  build:
-#    commands:
-#      - echo Build started on `date`
-#      - echo Building the Docker image...          
-#      - docker build -t $IMAGE_REPO_NAME:$IMAGE_TAG .
-#      - docker tag $IMAGE_REPO_NAME:$IMAGE_TAG $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG      
-#  post_build:
-#    commands:
-#      - echo Build completed on `date`
-#      - echo Pushing the Docker image...
-#      - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG
+      - echo Build started on `date`
+      - echo Building the Docker image...
+      - docker build -t $IMAGE_REPO_NAME:$IMAGE_TAG .
+      - docker tag $IMAGE_REPO_NAME:$IMAGE_TAG $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG
+  post_build:
+    commands:
+      - echo Build completed on `date`
+      - echo Pushing the Docker image...
+      - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG
