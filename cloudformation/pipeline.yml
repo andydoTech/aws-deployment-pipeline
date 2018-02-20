@@ -235,53 +235,6 @@ Resources:
                             }]
                         }
 
-    CodeDeployApplication:
-        Type: AWS::CodeDeploy::Application
-        Properties:
-            ApplicationName: !Sub ${ApplicationName}
-
-    CodeDeployServiceRole:
-        Type: AWS::IAM::Role
-        Properties: 
-            Path: /
-            RoleName: !Sub ${ApplicationName}-CodeDeploy-${AWS::Region}
-            AssumeRolePolicyDocument: |
-                {
-                    "Statement": [{
-                        "Action": "sts:AssumeRole",
-                        "Effect": "Allow",
-                        "Principal": { 
-                            "Service": "codedeploy.amazonaws.com" 
-                        }
-                    }]
-                }
-            Policies: 
-                - PolicyName: !Sub ${AWS::StackName}-${AWS::Region}
-                  PolicyDocument: !Sub |
-                    {
-                        "Version": "2012-10-17",
-                        "Statement": [
-                            {
-                            "Effect": "Allow",
-                            "Action": [
-                                "autoscaling:CompleteLifecycleAction",
-                                "autoscaling:DeleteLifecycleHook",
-                                "autoscaling:DescribeAutoScalingGroups",
-                                "autoscaling:DescribeLifecycleHooks",
-                                "autoscaling:PutLifecycleHook",
-                                "autoscaling:RecordLifecycleActionHeartbeat",
-                                "ec2:DescribeInstances",
-                                "ec2:DescribeInstanceStatus",
-                                "tag:GetTags",
-                                "tag:GetResources",
-                                "sns:Publish",
-                                "cloudwatch:DescribeAlarms"
-                            ],
-                            "Resource": "*"
-                            }
-                        ]
-                    }
-
     CodeBuildRole:
         Type: AWS::IAM::Role
         Properties: 
